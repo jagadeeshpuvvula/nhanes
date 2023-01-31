@@ -1,0 +1,28 @@
+---
+title: "01_explor"
+author: "Puvvula"
+date: "2023-01-31"
+output: pdf_document
+---
+NOTES
+2019-2020 cycle data combined with 2017-2018 cycle to build nationally representative data [pre-pandemic data] 
+2021-2022 cycle not available
+
+2019 onwards need manual access to files
+examination data (file: P_OHXDEN.xpt | variable: OHX##TC); 
+blood - total mercury: (file: P_PBCD.xpt | variable: LBXTHG )
+blood - inorganic, ethyl, methyl mercury: (file: P_IHGEM.xpt | variables: LBXIHG, LBXBGE, LBXBGM)
+urine - inorganic mercury: (file: P_UHG.xpt | variable: URXUHG)
+
+
+ex: https://ehsanx.github.io/SPPH504007SurveyData/docs/importing-nhanes-to-r.html#nhanes-dataset
+
+```{r}
+library(nhanesA) #Coverage: 1999 - 2018
+
+nhanesTables(data_group='EXAM', year=2013)
+
+oral<- nhanes("OHXDEN_H")
+
+```
+
