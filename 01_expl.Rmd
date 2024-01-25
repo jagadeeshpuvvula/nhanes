@@ -16,13 +16,71 @@ urine - inorganic mercury: (file: P_UHG.xpt | variable: URXUHG)
 
 
 ex: https://ehsanx.github.io/SPPH504007SurveyData/docs/importing-nhanes-to-r.html#nhanes-dataset
+nhanesA coverate 1999-2018
 
 ```{r}
-library(nhanesA) #Coverage: 1999 - 2018
+library(pacman)
+p_load(tidyverse, haven, survey)
+```
 
-nhanesTables(data_group='EXAM', year=2013)
+#filter women of reproductive age from NHANES demographics dataset
+```{r}
+nhanesDemo <- read_xpt(url(
+  "https://wwwn.cdc.gov/Nchs/Nhanes/2015-2016/DEMO_I.XPT")) |>
+  select(SEQN, INDFMPIR, RIDAGEYR,  RIAGENDR, WTINT2YR, SDMVPSU, SDMVSTRA)
 
-oral<- nhanes("OHXDEN_H")
+nhanesDesign <- svydesign(id      = ~SDMVPSU,
+                          strata  = ~SDMVSTRA,
+                          weights = ~WTINT2YR,
+                          nest    = TRUE,
+                          data    = nhanesDemo)
+```
+
+#downloaded NHANES data 2015-2016 cycle from : https://wwwn.cdc.gov/nchs/nhanes/search/datapage.aspx?Component=Laboratory&CycleBeginYear=2015
+```{r}
+folder_location <- "~/Documents/nhanes/nhanes_2015_2016/"
+files <- list.files(folder_location, pattern = "\\.xpt$", ignore.case = TRUE, full.names = TRUE)
+
+for (file in files) {
+  df_name <- tools::file_path_sans_ext(basename(file))
+  assign(df_name, read_xpt(file))
+}
+```
+
+#select only urine creatinine
+```{r}
+u_cr<- ALB_CR_I |>
+  select(SEQN, URXUCR, URDUCRLC)
 
 ```
+
+#creatinine adjustment for urinary biomarker concentarions
+```{r}
+
+```
+
+
+
+#join phthlates to nhanes demographic data
+```{r}
+dt_join <- left_join(nhanesDemo, PHTHTE_I, 
+                     by="SEQN")
+```
+
+#detection frequencies
+```{r}
+svytable(~dt_join$URDCNPLC, design = nhanesDesign)  |>
+  as_tibble() |>
+  mutate(prop= n/sum(n))
+```
+
+#quantile summary
+```{r}
+svyquantile(x= ~dt_join$URXMOH,
+            design = nhanesDesign,
+            na.rm=T,
+            quantiles = c(0.25, 0.50, 0.75)) 
+```
+
+
 
